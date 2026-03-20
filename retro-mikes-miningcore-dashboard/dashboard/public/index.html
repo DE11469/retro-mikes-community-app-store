@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MiningCore Live Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
+
+    <main class="dashboard">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Retro-Mike's MiningCore</p>
+          <h1>Live Network + Solo Pool Dashboard</h1>
+          <p class="hero-copy">
+            Live data only, refreshed every 5 seconds from MiningCore and CoinGecko.
+          </p>
+        </div>
+        <div class="status-panel">
+          <p><strong>API:</strong> <span id="apiBaseUrl">-</span></p>
+          <p><strong>Last update:</strong> <span id="lastUpdate">Waiting...</span></p>
+          <p><strong>Next refresh:</strong> <span id="nextRefresh">5s</span></p>
+          <p id="errorText" class="error-text" role="status" aria-live="polite"></p>
+        </div>
+      </header>
+
+      <section class="summary" id="summaryCards" aria-live="polite"></section>
+
+      <section class="nodes-manager">
+        <div class="section-head">
+          <h2>Node Selection</h2>
+          <div class="node-actions">
+            <button id="includeAllBtn" type="button">Include all</button>
+            <button id="excludeAllBtn" type="button">Exclude all</button>
+          </div>
+        </div>
+        <p class="manager-note">
+          New nodes from MiningCore are included automatically. Excluded nodes stay hidden until re-enabled.
+        </p>
+        <div id="nodeSelector" class="node-selector"></div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <h2>Node Metrics</h2>
+          <p id="visibleCount"></p>
+        </div>
+        <div id="nodesGrid" class="nodes-grid" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
