@@ -12,6 +12,10 @@ const RPC_USER = process.env.RPC_USER || "fixrpc";
 const RPC_PASSWORD = process.env.RPC_PASSWORD || "replace-with-strong-password";
 const REFRESH_INTERVAL_SECONDS = Math.max(1, Number(process.env.REFRESH_INTERVAL_SECONDS || 5));
 const EXPLORER_BASE_URL = process.env.EXPLORER_BASE_URL || "https://explorer.fixedcoin.org";
+const SOLO_STRATUM_HOST = process.env.SOLO_STRATUM_HOST || "umbrel.local";
+const SOLO_STRATUM_PORT = Number(process.env.SOLO_STRATUM_PORT || 3032);
+const SOLO_MINER_PASSWORD = process.env.SOLO_MINER_PASSWORD || "x";
+const SOLO_DEFAULT_WORKER = process.env.SOLO_DEFAULT_WORKER || "rig1";
 const STATIC_ROOT = path.join(__dirname, "public");
 
 const MIME_BY_EXT = {
@@ -93,6 +97,86 @@ function settledError(result) {
   return result.reason instanceof Error ? result.reason.message : String(result.reason);
 }
 
+function blockRewardFromSubsidy(subsidy) {
+  if (typeof subsidy === "number" && Number.isFinite(subsidy)) {
+    return subsidy;
+  }
+
+  if (!subsidy || typeof subsidy !== "object") {
+    return null;
+  }
+
+  const preferred = ["miner", "mining", "subsidy", "blocksubsidy", "reward", "value"];
+  for (const field of preferred) {
+    const numeric = toNumber(subsidy[field]);
+    if (numeric !== null) {
+      return numeric;
+    }
+  }
+
+  const values = Object.values(subsidy)
+    .map((value) => toNumber(value))
+    .filter((value) => value !== null);
+
+  if (values.length === 0) {
+    return null;
+  }
+
+  return values[0];
+}
+
+function walletLoaded(walletInfo, walletError) {
+  if (walletInfo && typeof walletInfo === "object") {
+    return true;
+  }
+
+  if (!walletError) {
+    return false;
+  }
+
+  const text = walletError.toLowerCase();
+  return !(text.includes("wallet") && text.includes("not") && text.includes("loaded"));
+}
+
+function readinessChecks({ healthy, peers, ibd, verificationProgressPct, walletIsLoaded }) {
+  const syncReady =
+    !ibd && (verificationProgressPct === null || verificationProgressPct >= 99.9);
+
+  const checks = [
+    {
+      key: "rpc",
+      label: "RPC reachable",
+      ok: healthy,
+      detail: healthy ? "Node responds to RPC calls." : "Fix RPC connectivity first."
+    },
+    {
+      key: "peers",
+      label: "At least 1 peer",
+      ok: peers !== null && peers > 0,
+      detail: peers !== null && peers > 0 ? `${peers} peers connected.` : "No network peers detected."
+    },
+    {
+      key: "sync",
+      label: "Node synced",
+      ok: syncReady,
+      detail: syncReady
+        ? `Sync at ${verificationProgressPct === null ? "N/A" : `${verificationProgressPct.toFixed(3)}%`}.`
+        : "Node still in initial sync."
+    },
+    {
+      key: "wallet",
+      label: "Wallet loaded",
+      ok: walletIsLoaded,
+      detail: walletIsLoaded ? "Wallet RPC available." : "Load or create a wallet before mining."
+    }
+  ];
+
+  return {
+    ready: checks.every((check) => check.ok),
+    checks
+  };
+}
+
 async function buildStatus() {
   const calls = await Promise.allSettled([
     rpcCall("getblockchaininfo"),
@@ -104,7 +188,8 @@ async function buildStatus() {
     rpcCall("getbestblockhash"),
     rpcCall("getdifficulty"),
     rpcCall("uptime"),
-    rpcCall("getwalletinfo")
+    rpcCall("getwalletinfo"),
+    rpcCall("getblocksubsidy")
   ]);
 
   const blockchainInfo = settledValue(calls[0], {});
@@ -117,10 +202,27 @@ async function buildStatus() {
   const difficulty = settledValue(calls[7], null);
   const uptime = settledValue(calls[8], null);
   const walletInfo = settledValue(calls[9], null);
+  const blockSubsidy = settledValue(calls[10], null);
 
   const criticalError = settledError(calls[0]) || settledError(calls[1]);
+  const walletError = settledError(calls[9]);
 
-  const verificationProgressPct = toNumber(blockchainInfo.verificationprogress);
+  const verificationProgressRatio = toNumber(blockchainInfo.verificationprogress);
+  const verificationProgressPct =
+    verificationProgressRatio === null ? null : verificationProgressRatio * 100;
+
+  const peers = toNumber(connectionCount) ?? toNumber(networkInfo.connections);
+  const ibd = Boolean(blockchainInfo.initialblockdownload);
+  const walletIsLoaded = walletLoaded(walletInfo, walletError);
+  const rewardPerBlock = blockRewardFromSubsidy(blockSubsidy);
+
+  const soloReadiness = readinessChecks({
+    healthy: criticalError === null,
+    peers,
+    ibd,
+    verificationProgressPct,
+    walletIsLoaded
+  });
 
   return {
     generatedAt: new Date().toISOString(),
@@ -138,12 +240,12 @@ async function buildStatus() {
       blocks: toNumber(blockchainInfo.blocks) ?? toNumber(blockCount),
       headers: toNumber(blockchainInfo.headers),
       bestBlockHash,
-      initialBlockDownload: Boolean(blockchainInfo.initialblockdownload),
-      verificationProgressPct: verificationProgressPct === null ? null : verificationProgressPct * 100,
+      initialBlockDownload: ibd,
+      verificationProgressPct,
       difficulty: toNumber(difficulty) ?? toNumber(blockchainInfo.difficulty)
     },
     network: {
-      peers: toNumber(connectionCount) ?? toNumber(networkInfo.connections),
+      peers,
       protocolVersion: toNumber(networkInfo.protocolversion),
       subversion: networkInfo.subversion || null,
       relayFee: toNumber(networkInfo.relayfee)
@@ -158,10 +260,24 @@ async function buildStatus() {
       usage: toNumber(mempoolInfo.usage)
     },
     wallet: {
-      loaded: Boolean(walletInfo && typeof walletInfo === "object"),
+      loaded: walletIsLoaded,
       balance: walletInfo && typeof walletInfo === "object" ? toNumber(walletInfo.balance) : null,
       txCount: walletInfo && typeof walletInfo === "object" ? toNumber(walletInfo.txcount) : null,
-      error: settledError(calls[9])
+      error: walletError
+    },
+    solo: {
+      mode: "solo-via-miningcore-stratum",
+      ready: soloReadiness.ready,
+      checks: soloReadiness.checks,
+      blockTimeSeconds: 600,
+      coinbaseMaturityBlocks: 100,
+      rewardPerBlock,
+      defaults: {
+        stratumHost: SOLO_STRATUM_HOST,
+        stratumPort: SOLO_STRATUM_PORT,
+        minerPassword: SOLO_MINER_PASSWORD,
+        workerName: SOLO_DEFAULT_WORKER
+      }
     },
     uptimeSeconds: toNumber(uptime),
     integration: {
@@ -169,7 +285,7 @@ async function buildStatus() {
       miningcoreRpcPort: RPC_PORT,
       miningcoreRpcUser: RPC_USER,
       notes:
-        "Use the same rpcuser/rpcpassword from this app in MiningCore coin config. FixedCoin appears in the MiningCore dashboard once your FIX pool is enabled."
+        "This UI is now solo-mining focused. Point your MiningCore FIX coin config at this node RPC, then direct your miners to the MiningCore FIX stratum endpoint."
     }
   };
 }
