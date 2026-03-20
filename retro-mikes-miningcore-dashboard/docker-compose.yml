@@ -1,0 +1,18 @@
+version: "3.7"
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: retro-mikes-miningcore-dashboard_server_1
+      APP_PORT: 8080
+
+  server:
+    build:
+      context: ./dashboard
+    restart: unless-stopped
+    environment:
+      MININGCORE_API_BASE_URL: http://retro-mikes-miningcore_server_1:4000
+      REFRESH_INTERVAL_SECONDS: "5"
+      BLOCK_PAGE_SIZE: "200"
+      PRICE_VS_CURRENCY: usd
+      COINGECKO_SYMBOL_MAP: ""
