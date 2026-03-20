@@ -5,6 +5,7 @@ Custom Umbrel Community App Store containing the MiningCore Live Dashboard app.
 ## Included apps
 
 - `retro-mikes-miningcore-dashboard`
+- `retro-mikes-fixedcoin-node`
 
 ## Add to Umbrel
 
