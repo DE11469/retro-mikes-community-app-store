@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FixedCoin Node</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="orb orb-a" aria-hidden="true"></div>
+    <div class="orb orb-b" aria-hidden="true"></div>
+
+    <main class="app-shell">
+      <header class="hero">
+        <div>
+          <p class="kicker">Retro-Mike's Umbrel</p>
+          <h1>FixedCoin Full Node</h1>
+          <p class="subtitle">Live RPC status for your FIX node, refreshed every 5 seconds.</p>
+        </div>
+        <div class="status-card">
+          <p><strong>RPC:</strong> <span id="rpcTarget">-</span></p>
+          <p><strong>Last update:</strong> <span id="lastUpdate">Waiting...</span></p>
+          <p><strong>Next refresh:</strong> <span id="nextRefresh">5s</span></p>
+          <p id="errorText" class="error-text" role="status" aria-live="polite"></p>
+        </div>
+      </header>
+
+      <section id="summaryGrid" class="summary-grid" aria-live="polite"></section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>MiningCore Integration</h2>
+          <a id="explorerLink" href="https://explorer.fixedcoin.org" target="_blank" rel="noreferrer">Open explorer</a>
+        </div>
+        <p class="panel-copy" id="integrationNote"></p>
+        <div id="integrationGrid" class="integration-grid"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Live JSON Snapshot</h2>
+        </div>
+        <pre id="jsonSnapshot" class="json-snapshot"></pre>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
