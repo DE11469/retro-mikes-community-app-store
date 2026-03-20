@@ -45,3 +45,7 @@ services:
       RPC_PASSWORD: "replace-with-strong-password"
       REFRESH_INTERVAL_SECONDS: "5"
       EXPLORER_BASE_URL: "https://explorer.fixedcoin.org"
+      SOLO_STRATUM_HOST: "umbrel.local"
+      SOLO_STRATUM_PORT: "3032"
+      SOLO_MINER_PASSWORD: "x"
+      SOLO_DEFAULT_WORKER: "rig1"
