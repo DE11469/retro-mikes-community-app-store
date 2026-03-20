@@ -1,0 +1,47 @@
+version: "3.7"
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: retro-mikes-fixedcoin-node_ui_1
+      APP_PORT: 8080
+
+  fixedcoin:
+    build:
+      context: ./node
+    restart: unless-stopped
+    stop_grace_period: 5m
+    environment:
+      FIXEDCOIN_RELEASE: "v29.1.2"
+      RPC_USER: "fixrpc"
+      RPC_PASSWORD: "replace-with-strong-password"
+      RPC_PORT: "24761"
+      P2P_PORT: "24768"
+      ZMQ_RAWBLOCK_PORT: "24763"
+      ZMQ_RAWTX_PORT: "24764"
+      ZMQ_HASHTX_PORT: "24765"
+      ZMQ_HASHBLOCK_PORT: "24766"
+      EXTRA_ADDNODES: ""
+    volumes:
+      - ${APP_DATA_DIR}/fixedcoin-data:/data
+    expose:
+      - "24761"
+      - "24768"
+      - "24763"
+      - "24764"
+      - "24765"
+      - "24766"
+
+  ui:
+    build:
+      context: ./ui
+    restart: unless-stopped
+    depends_on:
+      - fixedcoin
+    environment:
+      RPC_HOST: retro-mikes-fixedcoin-node_fixedcoin_1
+      RPC_PORT: "24761"
+      RPC_USER: "fixrpc"
+      RPC_PASSWORD: "replace-with-strong-password"
+      REFRESH_INTERVAL_SECONDS: "5"
+      EXPLORER_BASE_URL: "https://explorer.fixedcoin.org"
