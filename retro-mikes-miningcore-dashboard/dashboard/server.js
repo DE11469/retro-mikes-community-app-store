@@ -15,6 +15,7 @@ const STATIC_ROOT = path.join(__dirname, "public");
 
 const DEFAULT_COINGECKO_ID_BY_SYMBOL = {
   BTC: "bitcoin",
+  FIX: "fixedcoin",
   BCH: "bitcoin-cash",
   BSV: "bitcoin-cash-sv",
   LTC: "litecoin",
