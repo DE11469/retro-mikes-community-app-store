@@ -6,8 +6,11 @@ Run a standalone FixedCoin (FIX) full node on Umbrel with a built-in live UI.
 
 - `fixedcoind` full node service
 - Auto-download of official FixedCoin Linux binaries at container start
-- Live dashboard UI with 5-second refresh
+- Solo-mining focused dashboard UI with 5-second refresh
 - MiningCore integration hints (RPC host/port/user)
+- Solo miner config templates (stratum URL, username, password)
+- Live solo readiness checklist (RPC, peers, sync, wallet)
+- Expected blocks/day and FIX/day estimates from your hashrate
 
 ## Default ports
 
