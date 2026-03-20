@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>FixedCoin Node</title>
+    <title>FixedCoin Solo Mining Node</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -20,18 +20,85 @@
       <header class="hero">
         <div>
           <p class="kicker">Retro-Mike's Umbrel</p>
-          <h1>FixedCoin Full Node</h1>
-          <p class="subtitle">Live RPC status for your FIX node, refreshed every 5 seconds.</p>
+          <h1>FixedCoin Solo Mining Console</h1>
+          <p class="subtitle">Node health, solo readiness, and miner configuration in one place.</p>
         </div>
         <div class="status-card">
           <p><strong>RPC:</strong> <span id="rpcTarget">-</span></p>
           <p><strong>Last update:</strong> <span id="lastUpdate">Waiting...</span></p>
           <p><strong>Next refresh:</strong> <span id="nextRefresh">5s</span></p>
+          <p><strong>Solo status:</strong> <span id="soloReadyBadge" class="badge warning">Checking...</span></p>
           <p id="errorText" class="error-text" role="status" aria-live="polite"></p>
         </div>
       </header>
 
       <section id="summaryGrid" class="summary-grid" aria-live="polite"></section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Solo Mining Setup</h2>
+        </div>
+        <p class="panel-copy">Set your payout and miner settings, then use the generated config values in your ASIC or miner software.</p>
+
+        <div class="form-grid">
+          <label>
+            <span>Payout address (FIX)</span>
+            <input id="payoutAddressInput" type="text" placeholder="fix1..." />
+          </label>
+          <label>
+            <span>Worker name</span>
+            <input id="workerNameInput" type="text" placeholder="rig1" />
+          </label>
+          <label>
+            <span>Stratum host</span>
+            <input id="stratumHostInput" type="text" placeholder="umbrel.local" />
+          </label>
+          <label>
+            <span>Stratum port</span>
+            <input id="stratumPortInput" type="number" min="1" max="65535" placeholder="3032" />
+          </label>
+          <label>
+            <span>Miner password</span>
+            <input id="minerPasswordInput" type="text" placeholder="x" />
+          </label>
+          <label>
+            <span>Your hashrate</span>
+            <div class="inline-inputs">
+              <input id="minerHashrateInput" type="number" min="0" step="any" placeholder="0" />
+              <select id="hashrateUnitSelect">
+                <option value="H/s">H/s</option>
+                <option value="KH/s">KH/s</option>
+                <option value="MH/s">MH/s</option>
+                <option value="GH/s">GH/s</option>
+                <option value="TH/s" selected>TH/s</option>
+                <option value="PH/s">PH/s</option>
+              </select>
+            </div>
+          </label>
+        </div>
+
+        <div id="soloQuickStats" class="integration-grid"></div>
+
+        <div class="output-grid">
+          <article class="output-card">
+            <p>Stratum URL</p>
+            <code id="stratumUrlOutput">-</code>
+          </article>
+          <article class="output-card">
+            <p>Miner username</p>
+            <code id="minerUsernameOutput">-</code>
+          </article>
+          <article class="output-card">
+            <p>Miner password</p>
+            <code id="minerPasswordOutput">-</code>
+          </article>
+        </div>
+
+        <div class="panel-subhead">
+          <h3>Readiness Checklist</h3>
+        </div>
+        <ul id="readinessList" class="readiness-list"></ul>
+      </section>
 
       <section class="panel">
         <div class="panel-head">
