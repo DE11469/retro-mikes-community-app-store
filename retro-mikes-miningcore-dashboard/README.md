@@ -16,6 +16,8 @@ It only reads current data from:
 - Reward from found blocks
 - Immature to mature confirmation progress (%)
 
+Built-in coin pricing includes `FIX -> fixedcoin` by default.
+
 ## Refresh behavior
 
 - UI refreshes every 5 seconds by default (`REFRESH_INTERVAL_SECONDS=5`)
