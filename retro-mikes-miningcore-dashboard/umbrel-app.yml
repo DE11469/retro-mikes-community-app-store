@@ -1,0 +1,21 @@
+id: retro-mikes-miningcore-dashboard
+name: MiningCore Live Dashboard
+tagline: Live network, pool, and reward stats for Retro-Mike's MiningCore
+version: "0.1.0"
+icon: ./assets/icon.svg
+port: 8080
+category: monitoring
+description: >-
+  A standalone Umbrel dashboard that reads live MiningCore and market data every 5 seconds.
+  Shows network hashrate, network difficulty, USD price, estimated blocks/day, solo-pool blocks,
+  rewards, and immature-to-mature confirmation progress per node.
+developer: Retro-Mike
+website: https://github.com/retro-mike
+submitter: Retro-Mike
+submission: https://github.com/DE11469/retro-mikes-community-app-store
+repo: https://github.com/DE11469/retro-mikes-community-app-store
+support: https://github.com/DE11469/retro-mikes-community-app-store/issues
+gallery:
+  - https://raw.githubusercontent.com/getumbrel/umbrel-apps-gallery/master/bitcoin/1.jpg
+releaseNotes: >-
+  Initial release with 5-second auto-refresh, live MiningCore integration, and dynamic node selection.
